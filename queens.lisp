@@ -15,8 +15,8 @@
 	)
 )
 
-(defun gen_tablero (n)
-	(gen_tablero_fila (range 1 n) n)
+(defun gen_tablero (n &optional (desde 1))
+	(gen_tablero_fila (range desde n) n)
 )
 
 (defun gen_tablero_fila (filas n)
@@ -58,3 +58,11 @@
                                    ((2 1)(2 2)(2 3)(2 4))
                                    ((3 1)(3 2)(3 3)(3 4))
                                    ((4 1)(4 2)(4 3)(4 4)) ))
+
+(test 'tablero5 (gen_tablero 4 1) '( ((1 1)(1 2)(1 3)(1 4))
+                                     ((2 1)(2 2)(2 3)(2 4))
+                                     ((3 1)(3 2)(3 3)(3 4))
+                                     ((4 1)(4 2)(4 3)(4 4)) ))
+(test 'tablero6 (gen_tablero 4 2) '( ((2 1)(2 2)(2 3)(2 4))
+                                     ((3 1)(3 2)(3 3)(3 4))
+                                     ((4 1)(4 2)(4 3)(4 4)) ))
