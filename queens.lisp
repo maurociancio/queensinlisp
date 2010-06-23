@@ -31,7 +31,10 @@
 )
 
 (defun es_reinas_parcial (n selectedpos)
-	t
+	(if (null selectedpos)
+		t
+		t
+	)
 )
 
 (defun do_reinas (n selectedpos tablero)
@@ -95,3 +98,4 @@
 (test 'do_reinas (do_reinas 2 '((1 1)(2 2)) nil) '((1 1)(2 2)))
 
 (test 'es_reinas (es_reinas_parcial 1 '((1 1))) t)
+(test 'es_reinas1 (es_reinas_parcial 1 nil) t)
