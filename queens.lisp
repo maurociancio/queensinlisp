@@ -147,6 +147,7 @@
 (test 'es_reinas5 (es_reinas_parcial 3 '((1 1)(2 3))) t)
 (test 'es_reinas6 (es_reinas_parcial 3 '((1 1)(2 2))) nil)
 (test 'es_reinas7 (es_reinas_parcial 3 '((2 1)(3 3)(1 4))) t)
+(test 'es_reinas8 (es_reinas_parcial 3 '((1 2)(2 4)(3 3)(4 1))) t)
 
 (test 'alineados1 (alineados '(1 1) '((1 2))) t)
 (test 'alineados2 (alineados '(1 1) nil) nil)
