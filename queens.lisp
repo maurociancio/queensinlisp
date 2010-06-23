@@ -30,12 +30,36 @@
 	(cons (caar tablero) selectedpos)
 )
 
+;===========================================================================
+;(x1 y1) (x2 y2)
+;no alineados
+;(x2 - x1) * (y2 - y1) != 0
+(defun no_alineado (nuevo viejo)
+	(not (eq (* (- (car nuevo) (car viejo)) (- (cadr nuevo) (cadr viejo))) '0))
+)
+
+(defun no_alineados (nuevo viejos)
+	(if (null viejos)
+		t
+		(or 	(no_alineado nuevo (car viejos))
+			(no_alineados nuevo (cdr viejos))
+		)
+	)
+)
+
+(defun no_diagonales (nuevo viejos)
+	t
+)
+
 (defun es_reinas_parcial (n selectedpos)
 	(if (null selectedpos)
 		t
-		t
+		(and (no_alineados (car selectedpos) (cdr selectedpos))
+                     (no_diagonales   (car selectedpos) (cdr selectedpos))
+		)
 	)
 )
+;===========================================================================
 
 (defun do_reinas (n selectedpos tablero)
 	(if (eq (length selectedpos) n)
@@ -99,3 +123,12 @@
 
 (test 'es_reinas (es_reinas_parcial 1 '((1 1))) t)
 (test 'es_reinas1 (es_reinas_parcial 1 nil) t)
+;(test 'es_reinas2 (es_reinas_parcial 1 '((1 1)(1 2))) nil)
+
+;(test 'alineados1 (no_alineados '(1 1) '((1 2))) nil)
+
+(test 'alineado1 (no_alineado '(1 1) '(1 2)) nil)
+(test 'alineado2 (no_alineado '(1 1) '(2 2)) t)
+(test 'alineado3 (no_alineado '(1 1) '(3 3)) t)
+(test 'alineado4 (no_alineado '(1 1) '(3 1)) nil)
+(test 'alineado5 (no_alineado '(3 1) '(3 1)) nil)
