@@ -26,6 +26,31 @@
 	)
 )
 
+(defun armar_selected (tablero selectedpos)
+	(cons (caar tablero) selectedpos)
+)
+
+(defun es_reinas_parcial (n selectedpos)
+	t
+)
+
+(defun do_reinas (n selectedpos tablero)
+	(if (eq (length selectedpos) n)
+		selectedpos
+		(if (es_reinas_parcial n (armar_selected tablero selectedpos))
+			(do_reinas n (armar_selected tablero selectedpos) (cdr tablero))
+			(if (hay_mas_casilleros n tablero)
+				(do_reinas n (armar_selected tablero selectedpos) (cadar tablero))
+				(do_reinas n (cdr selectedpos) (gen_tablero n (- (length selectedpos) 1)))
+			)
+		)
+	)
+)
+
+(defun reinas (n)
+	(do_reinas n nil (gen_tablero n))
+)
+
 ;=============================
 ;testing function
 ;=============================
@@ -66,3 +91,5 @@
 (test 'tablero6 (gen_tablero 4 2) '( ((2 1)(2 2)(2 3)(2 4))
                                      ((3 1)(3 2)(3 3)(3 4))
                                      ((4 1)(4 2)(4 3)(4 4)) ))
+
+(test 'do_reinas (do_reinas 2 '((1 1)(2 2)) nil) '((1 1)(2 2)))
