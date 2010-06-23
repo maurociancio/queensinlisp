@@ -32,30 +32,45 @@
 
 ;===========================================================================
 ;(x1 y1) (x2 y2)
-;no alineados
-;(x2 - x1) * (y2 - y1) != 0
-(defun no_alineado (nuevo viejo)
-	(not (eq (* (- (car nuevo) (car viejo)) (- (cadr nuevo) (cadr viejo))) '0))
+;alineado
+;dx * dy != 0
+;(x2 - x1) * (y2 - y1) == 0
+(defun alineado (nuevo viejo)
+	(eq (* (- (car nuevo) (car viejo)) (- (cadr nuevo) (cadr viejo))) '0)
 )
 
-(defun no_alineados (nuevo viejos)
+(defun alineados (nuevo viejos)
 	(if (null viejos)
-		t
-		(or 	(no_alineado nuevo (car viejos))
-			(no_alineados nuevo (cdr viejos))
+		nil
+		(or 	(alineado nuevo (car viejos))
+			(alineados nuevo (cdr viejos))
 		)
 	)
 )
 
-(defun no_diagonales (nuevo viejos)
-	t
+;abs(dx) == abs(dy)
+;abs(x2 - x1) == abs (y2 - y1)
+;abs(x2 - x1) - abs (y2 - y1) == 0
+(defun diagonal (nuevo viejo)
+	(eq (- (abs(- (car nuevo) (car viejo) ) ) (abs(- (cadr nuevo) (cadr viejo)) ) ) '0)
 )
 
+(defun diagonales (nuevo viejos)
+	(if (null viejos)
+		nil
+		(or 	(diagonal nuevo (car viejos))
+			(diagonales nuevo (cdr viejos))
+		)
+	)
+)
+
+;revisa que el primer elemento de selectedpos verifique la condicion
+;de reinas. los restantes elementos deben verificarlo
 (defun es_reinas_parcial (n selectedpos)
 	(if (null selectedpos)
 		t
-		(and (no_alineados (car selectedpos) (cdr selectedpos))
-                     (no_diagonales   (car selectedpos) (cdr selectedpos))
+		(and (not (alineados (car selectedpos) (cdr selectedpos)))
+                     (not (diagonales   (car selectedpos) (cdr selectedpos)))
 		)
 	)
 )
@@ -101,11 +116,14 @@
 (test 'range2 (range 0 9) '(0 1 2 3 4 5 6 7 8 9))
 
 (test 'tablero1 (gen_tablero 1) '( ((1 1)) ))
+
 (test 'tablero2 (gen_tablero 2) '( ((1 1)(1 2))
                                    ((2 1)(2 2)) ))
+
 (test 'tablero3 (gen_tablero 3) '( ((1 1)(1 2)(1 3))
                                    ((2 1)(2 2)(2 3))
                                    ((3 1)(3 2)(3 3)) ))
+
 (test 'tablero4 (gen_tablero 4) '( ((1 1)(1 2)(1 3)(1 4))
                                    ((2 1)(2 2)(2 3)(2 4))
                                    ((3 1)(3 2)(3 3)(3 4))
@@ -115,20 +133,29 @@
                                      ((2 1)(2 2)(2 3)(2 4))
                                      ((3 1)(3 2)(3 3)(3 4))
                                      ((4 1)(4 2)(4 3)(4 4)) ))
+
 (test 'tablero6 (gen_tablero 4 2) '( ((2 1)(2 2)(2 3)(2 4))
                                      ((3 1)(3 2)(3 3)(3 4))
                                      ((4 1)(4 2)(4 3)(4 4)) ))
 
 (test 'do_reinas (do_reinas 2 '((1 1)(2 2)) nil) '((1 1)(2 2)))
 
-(test 'es_reinas (es_reinas_parcial 1 '((1 1))) t)
-(test 'es_reinas1 (es_reinas_parcial 1 nil) t)
-;(test 'es_reinas2 (es_reinas_parcial 1 '((1 1)(1 2))) nil)
+(test 'es_reinas1 (es_reinas_parcial 1 '((1 1))) t)
+(test 'es_reinas2 (es_reinas_parcial 1 nil) t)
+(test 'es_reinas3 (es_reinas_parcial 2 '((1 1)(1 2))) nil)
+(test 'es_reinas4 (es_reinas_parcial 3 '((1 1)(2 4))) t)
+(test 'es_reinas5 (es_reinas_parcial 3 '((1 1)(2 3))) t)
+(test 'es_reinas6 (es_reinas_parcial 3 '((1 1)(2 2))) nil)
+(test 'es_reinas7 (es_reinas_parcial 3 '((2 1)(3 3)(1 4))) t)
 
-;(test 'alineados1 (no_alineados '(1 1) '((1 2))) nil)
+(test 'alineados1 (alineados '(1 1) '((1 2))) t)
+(test 'alineados2 (alineados '(1 1) nil) nil)
+(test 'alineados3 (alineados '(1 1) '((1 3))) t)
 
-(test 'alineado1 (no_alineado '(1 1) '(1 2)) nil)
-(test 'alineado2 (no_alineado '(1 1) '(2 2)) t)
-(test 'alineado3 (no_alineado '(1 1) '(3 3)) t)
-(test 'alineado4 (no_alineado '(1 1) '(3 1)) nil)
-(test 'alineado5 (no_alineado '(3 1) '(3 1)) nil)
+(test 'diagonales1 (diagonales '(1 1) nil) nil)
+
+(test 'alineado1 (alineado '(1 1) '(1 2)) t)
+(test 'alineado2 (alineado '(1 1) '(2 2)) nil)
+(test 'alineado3 (alineado '(1 1) '(3 3)) nil)
+(test 'alineado4 (alineado '(1 1) '(3 1)) t)
+(test 'alineado5 (alineado '(3 1) '(3 1)) t)
