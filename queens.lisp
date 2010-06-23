@@ -93,3 +93,5 @@
                                      ((4 1)(4 2)(4 3)(4 4)) ))
 
 (test 'do_reinas (do_reinas 2 '((1 1)(2 2)) nil) '((1 1)(2 2)))
+
+(test 'es_reinas (es_reinas_parcial 1 '((1 1))) t)
