@@ -13,6 +13,17 @@
 	)
 )
 
+(defun gen_tablero (n)
+	(gen_tablero_fila (range 1 n) n)
+)
+
+(defun gen_tablero_fila (filas n)
+	(if (null filas)
+		nil
+		(cons (gen_rows (car filas) n) (gen_tablero_fila (cdr filas) n))
+	)
+)
+
 ;=============================
 ;testing function
 ;=============================
@@ -34,3 +45,10 @@
 
 (test 'range1 (range 2 3) '(2 3))
 (test 'range2 (range 0 9) '(0 1 2 3 4 5 6 7 8 9))
+
+(test 'tablero1 (gen_tablero 1) '( ((1 1)) ))
+(test 'tablero2 (gen_tablero 2) '( ((1 1)(1 2))
+                                   ((2 1)(2 2)) ))
+(test 'tablero3 (gen_tablero 3) '( ((1 1)(1 2)(1 3))
+                                   ((2 1)(2 2)(2 3))
+                                   ((3 1)(3 2)(3 3)) ))
