@@ -154,6 +154,9 @@
 (test 'alineados3 (alineados '(1 1) '((1 3))) t)
 
 (test 'diagonales1 (diagonales '(1 1) nil) nil)
+(test 'diagonales2 (diagonales '(1 1) '((1 2))) nil)
+(test 'diagonales3 (diagonales '(1 1) '((2 1))) nil)
+(test 'diagonales4 (diagonales '(1 1) '((2 2))) t)
 
 (test 'alineado1 (alineado '(1 1) '(1 2)) t)
 (test 'alineado2 (alineado '(1 1) '(2 2)) nil)
