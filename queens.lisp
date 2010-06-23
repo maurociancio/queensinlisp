@@ -1,3 +1,5 @@
+;autor mauro ciancio
+
 (defun gen_rows (row cols)
 	(if (eq cols 0)
 		nil
