@@ -71,17 +71,11 @@
 ;====================================
 
 (defun armar_selected (tablero selectedpos)
-	(print '===============)
-	(print 'armar)
-	(print tablero)
-	(print selectedpos)
 	(cons (caar tablero) selectedpos)
 )
 
+;se llama cuando selectedpos ya no son reinas
 (defun proxima_posicion (selectedpos n)
-	(print selectedpos)
-	;selectedpos = ((x y) .... )
-	;y==n
 	(if (eq (cadar selectedpos) n)
 		;no hay mas posiciones a la derecha, buscamos arriba
 		(proxima_posicion (cdr selectedpos) n)
@@ -118,43 +112,25 @@
 ;revisa que el primer elemento de selectedpos verifique la condicion
 ;de reinas. los restantes elementos deben verificarlo
 (defun es_reinas_parcial (n selectedpos)
-	(print '======)
-	(print 'parcial)
-	(print selectedpos)
 	(if (null selectedpos)
 		t
 		(and (not (alineados (car selectedpos) (cdr selectedpos)))
                      (not (diagonales   (car selectedpos) (cdr selectedpos)))
+                     (es_reinas_parcial n (cdr selectedpos))
 		)
 	)
-)
-
-(defun hay_mas_casilleros (n ultimo)
-	(print '=========)
-	(print 'haymas)
-	(print ultimo)
-	(print n)
-	(not (eq (cadr ultimo) n))
 )
 
 (defun do_reinas (n selectedpos tablero)
-	(print '===)
-	(print 'reinas)
-	(print selectedpos)
-	(print tablero)
 	(if (eq (length selectedpos) n)
 		selectedpos
-		(buscar_reinas n selectedpos tablero (armar_selected tablero selectedpos))
+		(buscar_reinas n (armar_selected tablero selectedpos) (cdr tablero))
 	)
 )
-
-(defun buscar_reinas (n selectedpos tablero proximapos)
-	(if (es_reinas_parcial n proximapos)
-		(do_reinas n proximapos (cdr tablero))
-		(if (hay_mas_casilleros n (car proximapos))
-			(do_reinas n selectedpos (cons (cdar tablero) (cdr tablero)))
-			(do_reinas n (proxima_posicion selectedpos n) (proximo_tablero n (car (proxima_posicion selectedpos n))))
-		)
+(defun buscar_reinas (n newpos tablero)
+	(if (es_reinas_parcial n newpos)
+		(do_reinas n newpos (gen_tablero n (+ (length newpos) '1)))
+		(buscar_reinas n (proxima_posicion newpos n) (proximo_tablero n (car (proxima_posicion newpos n))))
 	)
 )
 
@@ -177,10 +153,9 @@
 ;tests
 ;=============================
 
-(print 'caca)
-;(print (reinas 1))
 (print (reinas 4))
-(exit)
+(print (reinas 5))
+(print (reinas 6))
 
 (test 'genrows1 (gen_rows 1 2) '((1 1) (1 2)))
 (test 'genrows2 (gen_rows 1 3) '((1 1) (1 2) (1 3)))
@@ -222,14 +197,15 @@
 
 (test 'do_reinas (do_reinas 2 '((1 1)(2 2)) nil) '((1 1)(2 2)))
 
-(test 'es_reinas1 (es_reinas_parcial 1 '((1 1))) t)
+(test 'es_reinas1 (es_reinas_parcial 2 '((1 1))) t)
 (test 'es_reinas2 (es_reinas_parcial 1 nil) t)
 (test 'es_reinas3 (es_reinas_parcial 2 '((1 1)(1 2))) nil)
 (test 'es_reinas4 (es_reinas_parcial 3 '((1 1)(2 4))) t)
 (test 'es_reinas5 (es_reinas_parcial 3 '((1 1)(2 3))) t)
 (test 'es_reinas6 (es_reinas_parcial 3 '((1 1)(2 2))) nil)
 (test 'es_reinas7 (es_reinas_parcial 3 '((2 1)(3 3)(1 4))) t)
-(test 'es_reinas8 (es_reinas_parcial 3 '((1 2)(2 4)(3 3)(4 1))) t)
+(test 'es_reinas8 (es_reinas_parcial 4 '((1 2)(2 4)(3 1)(4 3))) t)
+(test 'es_reinas9 (es_reinas_parcial 4 '( (3 3) (2 4) (1 1))) nil)
 
 (test 'alineados1 (alineados '(1 1) '((1 2))) t)
 (test 'alineados2 (alineados '(1 1) nil) nil)
@@ -245,3 +221,11 @@
 (test 'alineado3 (alineado '(1 1) '(3 3)) nil)
 (test 'alineado4 (alineado '(1 1) '(3 1)) t)
 (test 'alineado5 (alineado '(3 1) '(3 1)) t)
+
+(test 'proxpos1 (proxima_posicion '((1 1)) 4) '((1 2)) )
+(test 'proxpos2 (proxima_posicion '((1 2)) 4) '((1 3)) )
+(test 'proxpos3 (proxima_posicion '((1 3)) 4) '((1 4)) )
+(test 'proxpos4 (proxima_posicion '((2 4) (1 1)) 4) '((1 2)) )
+(test 'proxpos5 (proxima_posicion '((2 4) (1 2)) 4) '((1 3)) )
+(test 'proxpos6 (proxima_posicion '((2 4) (1 3)) 4) '((1 4)) )
+(test 'proxpos7 (proxima_posicion '((3 4) (2 4) (1 1)) 4) '((1 2)) )
