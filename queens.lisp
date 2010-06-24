@@ -1,12 +1,8 @@
 ;autor mauro ciancio
 
-(defun gen_rows (row cols)
-	(if (eq cols 0)
-		nil
-		(append (gen_rows row (- cols 1)) (list (list row cols)))
-	)
-)
-
+;====================================
+;GENERA TABLERO
+;====================================
 
 (defun range (start end)
 	(if (> start end)
@@ -14,6 +10,14 @@
 		(cons start (range (+ start 1) end))
 	)
 )
+
+(defun gen_rows (row cols &optional (desde 0))
+	(if (eq cols desde)
+		nil
+		(append (gen_rows row (- cols 1) desde) (list (list row cols)))
+	)
+)
+
 
 (defun gen_tablero (n &optional (desde 1))
 	(gen_tablero_fila (range desde n) n)
@@ -26,11 +30,10 @@
 	)
 )
 
-(defun armar_selected (tablero selectedpos)
-	(cons (caar tablero) selectedpos)
-)
+;====================================
+;POSICIONES Y DIRECCIONES EN EL TABLERO
+;====================================
 
-;===========================================================================
 ;(x1 y1) (x2 y2)
 ;alineado
 ;dx * dy != 0
@@ -64,9 +67,60 @@
 	)
 )
 
+;====================================
+;====================================
+
+(defun armar_selected (tablero selectedpos)
+	(print '===============)
+	(print 'armar)
+	(print tablero)
+	(print selectedpos)
+	(cons (caar tablero) selectedpos)
+)
+
+(defun proxima_posicion (selectedpos n)
+	(print selectedpos)
+	;selectedpos = ((x y) .... )
+	;y==n
+	(if (eq (cadar selectedpos) n)
+		;no hay mas posiciones a la derecha, buscamos arriba
+		(proxima_posicion (cdr selectedpos) n)
+		;vamos bien
+		;( (x, y+1) ... )
+		(cons
+			;(x, y+1)
+			(list (caar selectedpos) (+ (cadar selectedpos) '1))
+			;(....)
+			(cdr selectedpos)
+		)
+	)
+)
+
+;proxima_posicion = ( x y )
+(defun proximo_tablero (n proxima_posicion)
+	(mycons
+		;fila del tablero desde y+1 hasta n
+		(gen_rows (car proxima_posicion) n (cadr proxima_posicion))
+		;tablero con filas desde x+1 hasta n
+		(gen_tablero n (+ (car proxima_posicion) '1))
+	)
+)
+
+(defun mycons (elem lista)
+	(if (null elem)
+		lista
+		(cons elem lista)
+	)
+)
+
+;=============================================
+
 ;revisa que el primer elemento de selectedpos verifique la condicion
 ;de reinas. los restantes elementos deben verificarlo
 (defun es_reinas_parcial (n selectedpos)
+	(print '======)
+	(print 'parcial)
+	(print selectedpos)
 	(if (null selectedpos)
 		t
 		(and (not (alineados (car selectedpos) (cdr selectedpos)))
@@ -74,17 +128,32 @@
 		)
 	)
 )
-;===========================================================================
+
+(defun hay_mas_casilleros (n ultimo)
+	(print '=========)
+	(print 'haymas)
+	(print ultimo)
+	(print n)
+	(not (eq (cadr ultimo) n))
+)
 
 (defun do_reinas (n selectedpos tablero)
+	(print '===)
+	(print 'reinas)
+	(print selectedpos)
+	(print tablero)
 	(if (eq (length selectedpos) n)
 		selectedpos
-		(if (es_reinas_parcial n (armar_selected tablero selectedpos))
-			(do_reinas n (armar_selected tablero selectedpos) (cdr tablero))
-			(if (hay_mas_casilleros n tablero)
-				(do_reinas n (armar_selected tablero selectedpos) (cadar tablero))
-				(do_reinas n (cdr selectedpos) (gen_tablero n (- (length selectedpos) 1)))
-			)
+		(buscar_reinas n selectedpos tablero (armar_selected tablero selectedpos))
+	)
+)
+
+(defun buscar_reinas (n selectedpos tablero proximapos)
+	(if (es_reinas_parcial n proximapos)
+		(do_reinas n proximapos (cdr tablero))
+		(if (hay_mas_casilleros n (car proximapos))
+			(do_reinas n selectedpos (cons (cdar tablero) (cdr tablero)))
+			(do_reinas n (proxima_posicion selectedpos n) (proximo_tablero n (car (proxima_posicion selectedpos n))))
 		)
 	)
 )
@@ -108,9 +177,22 @@
 ;tests
 ;=============================
 
+(print 'caca)
+;(print (reinas 1))
+(print (reinas 4))
+(exit)
+
 (test 'genrows1 (gen_rows 1 2) '((1 1) (1 2)))
 (test 'genrows2 (gen_rows 1 3) '((1 1) (1 2) (1 3)))
 (test 'genrows3 (gen_rows 2 3) '((2 1) (2 2) (2 3)))
+(test 'genrows4 (gen_rows 2 3 1) '((2 2) (2 3)))
+
+(test 'prox_tablero (proximo_tablero 3 '(1 2)) '(
+						 ((1 3))
+						 ((2 1) (2 2) (2 3))
+						 ((3 1) (3 2) (3 3))
+						))
+
 
 (test 'range1 (range 2 3) '(2 3))
 (test 'range2 (range 0 9) '(0 1 2 3 4 5 6 7 8 9))
