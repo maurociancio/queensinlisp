@@ -153,9 +153,15 @@
 ;tests
 ;=============================
 
-(print (reinas 4))
-(print (reinas 5))
-(print (reinas 6))
+(defun print_reinas (i)
+	(print (reinas i))
+)
+(defun calc_reinas ()
+	(print 'REINAS)
+	(mapcar 'print_reinas (range 4 13))
+)
+
+(calc_reinas)
 
 (test 'genrows1 (gen_rows 1 2) '((1 1) (1 2)))
 (test 'genrows2 (gen_rows 1 3) '((1 1) (1 2) (1 3)))
