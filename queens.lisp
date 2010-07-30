@@ -5,29 +5,29 @@
 ;====================================
 
 (defun range (start end)
-	(if (> start end)
-		nil
-		(cons start (range (+ start 1) end))
-	)
+    (if (> start end)
+        nil
+        (cons start (range (+ start 1) end))
+    )
 )
 
 (defun gen_rows (row cols &optional (desde 0))
-	(if (eq cols desde)
-		nil
-		(append (gen_rows row (- cols 1) desde) (list (list row cols)))
-	)
+    (if (eq cols desde)
+        nil
+        (append (gen_rows row (- cols 1) desde) (list (list row cols)))
+    )
 )
 
 
 (defun gen_tablero (n &optional (desde 1))
-	(gen_tablero_fila (range desde n) n)
+    (gen_tablero_fila (range desde n) n)
 )
 
 (defun gen_tablero_fila (filas n)
-	(if (null filas)
-		nil
-		(cons (gen_rows (car filas) n) (gen_tablero_fila (cdr filas) n))
-	)
+    (if (null filas)
+        nil
+        (cons (gen_rows (car filas) n) (gen_tablero_fila (cdr filas) n))
+    )
 )
 
 ;====================================
@@ -39,72 +39,72 @@
 ;dx * dy != 0
 ;(x2 - x1) * (y2 - y1) == 0
 (defun alineado (nuevo viejo)
-	(eq (* (- (car nuevo) (car viejo)) (- (cadr nuevo) (cadr viejo))) '0)
+    (eq (* (- (car nuevo) (car viejo)) (- (cadr nuevo) (cadr viejo))) '0)
 )
 
 (defun alineados (nuevo viejos)
-	(if (null viejos)
-		nil
-		(or 	(alineado nuevo (car viejos))
-			(alineados nuevo (cdr viejos))
-		)
-	)
+    (if (null viejos)
+        nil
+        (or (alineado nuevo (car viejos))
+            (alineados nuevo (cdr viejos))
+        )
+    )
 )
 
 ;abs(dx) == abs(dy)
 ;abs(x2 - x1) == abs (y2 - y1)
 ;abs(x2 - x1) - abs (y2 - y1) == 0
 (defun diagonal (nuevo viejo)
-	(eq (- (abs(- (car nuevo) (car viejo) ) ) (abs(- (cadr nuevo) (cadr viejo)) ) ) '0)
+    (eq (- (abs(- (car nuevo) (car viejo) ) ) (abs(- (cadr nuevo) (cadr viejo)) ) ) '0)
 )
 
 (defun diagonales (nuevo viejos)
-	(if (null viejos)
-		nil
-		(or 	(diagonal nuevo (car viejos))
-			(diagonales nuevo (cdr viejos))
-		)
-	)
+    (if (null viejos)
+        nil
+        (or (diagonal nuevo (car viejos))
+            (diagonales nuevo (cdr viejos))
+        )
+    )
 )
 
 ;====================================
 ;====================================
 
 (defun armar_selected (tablero selectedpos)
-	(cons (caar tablero) selectedpos)
+    (cons (caar tablero) selectedpos)
 )
 
 ;se llama cuando selectedpos ya no son reinas
 (defun proxima_posicion (selectedpos n)
-	(if (eq (cadar selectedpos) n)
-		;no hay mas posiciones a la derecha, buscamos arriba
-		(proxima_posicion (cdr selectedpos) n)
-		;vamos bien
-		;( (x, y+1) ... )
-		(cons
-			;(x, y+1)
-			(list (caar selectedpos) (+ (cadar selectedpos) '1))
-			;(....)
-			(cdr selectedpos)
-		)
-	)
+    (if (eq (cadar selectedpos) n)
+        ;no hay mas posiciones a la derecha, buscamos arriba
+        (proxima_posicion (cdr selectedpos) n)
+        ;vamos bien
+        ;( (x, y+1) ... )
+        (cons
+            ;(x, y+1)
+            (list (caar selectedpos) (+ (cadar selectedpos) '1))
+            ;(....)
+            (cdr selectedpos)
+        )
+    )
 )
 
 ;proxima_posicion = ( x y )
 (defun proximo_tablero (n proxima_posicion)
-	(mycons
-		;fila del tablero desde y+1 hasta n
-		(gen_rows (car proxima_posicion) n (cadr proxima_posicion))
-		;tablero con filas desde x+1 hasta n
-		(gen_tablero n (+ (car proxima_posicion) '1))
-	)
+    (mycons
+        ;fila del tablero desde y+1 hasta n
+        (gen_rows (car proxima_posicion) n (cadr proxima_posicion))
+        ;tablero con filas desde x+1 hasta n
+        (gen_tablero n (+ (car proxima_posicion) '1))
+    )
 )
 
 (defun mycons (elem lista)
-	(if (null elem)
-		lista
-		(cons elem lista)
-	)
+    (if (null elem)
+        lista
+        (cons elem lista)
+    )
 )
 
 ;=============================================
@@ -112,30 +112,30 @@
 ;revisa que el primer elemento de selectedpos verifique la condicion
 ;de reinas. los restantes elementos deben verificarlo
 (defun es_reinas_parcial (n selectedpos)
-	(if (null selectedpos)
-		t
-		(and (not (alineados (car selectedpos) (cdr selectedpos)))
+    (if (null selectedpos)
+        t
+        (and (not (alineados (car selectedpos) (cdr selectedpos)))
                      (not (diagonales   (car selectedpos) (cdr selectedpos)))
                      (es_reinas_parcial n (cdr selectedpos))
-		)
-	)
+        )
+    )
 )
 
 (defun do_reinas (n selectedpos tablero)
-	(if (eq (length selectedpos) n)
-		selectedpos
-		(buscar_reinas n (armar_selected tablero selectedpos) (cdr tablero))
-	)
+    (if (eq (length selectedpos) n)
+        selectedpos
+        (buscar_reinas n (armar_selected tablero selectedpos) (cdr tablero))
+    )
 )
 (defun buscar_reinas (n newpos tablero)
-	(if (es_reinas_parcial n newpos)
-		(do_reinas n newpos (gen_tablero n (+ (length newpos) '1)))
-		(buscar_reinas n (proxima_posicion newpos n) (proximo_tablero n (car (proxima_posicion newpos n))))
-	)
+    (if (es_reinas_parcial n newpos)
+        (do_reinas n newpos (gen_tablero n (+ (length newpos) '1)))
+        (buscar_reinas n (proxima_posicion newpos n) (proximo_tablero n (car (proxima_posicion newpos n))))
+    )
 )
 
 (defun reinas (n)
-	(do_reinas n nil (gen_tablero n))
+    (do_reinas n nil (gen_tablero n))
 )
 
 ;=============================
@@ -154,11 +154,12 @@
 ;=============================
 
 (defun print_reinas (i)
-	(print (reinas i))
+    (print i)
+    (print (reinas i))
 )
 (defun calc_reinas ()
-	(print 'REINAS)
-	(mapcar 'print_reinas (range 4 13))
+    (print 'REINAS)
+    (mapcar 'print_reinas (range 4 13))
 )
 
 (calc_reinas)
@@ -169,10 +170,10 @@
 (test 'genrows4 (gen_rows 2 3 1) '((2 2) (2 3)))
 
 (test 'prox_tablero (proximo_tablero 3 '(1 2)) '(
-						 ((1 3))
-						 ((2 1) (2 2) (2 3))
-						 ((3 1) (3 2) (3 3))
-						))
+                         ((1 3))
+                         ((2 1) (2 2) (2 3))
+                         ((3 1) (3 2) (3 3))
+                        ))
 
 
 (test 'range1 (range 2 3) '(2 3))
